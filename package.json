@@ -1,0 +1,35 @@
+{
+  "name": "govind-academics",
+  "version": "1.0.0",
+  "description": "An eductional organization for school student",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JageshwarSah/govind-institutes.git"
+  },
+  "keywords": [
+    "school",
+    "institute",
+    "college",
+    "student",
+    "learning"
+  ],
+  "author": "Jageshwar Sah",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JageshwarSah/govind-institutes/issues"
+  },
+  "homepage": "https://github.com/JageshwarSah/govind-institutes#readme",
+  "devDependencies": {
+    "dotenv": "^8.2.0"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "helmet": "^4.4.1",
+    "mongoose": "^5.12.3",
+    "xss-clean": "^0.1.1"
+  }
+}
