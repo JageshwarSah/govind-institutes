@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
 
+const API_features = require('./../helpers/api_features');
+const Error = require('./error_handler');
+
+//* Database connection method
 exports.connect = async (db_string) => {
   const db = await mongoose.connect(db_string, {
     useNewUrlParser: true,
@@ -14,10 +18,16 @@ exports.connect = async (db_string) => {
 exports.get_all = (Model) => {
   return async (req, res, next) => {
     try {
-      const docs = await Model.find({});
+      const features = new API_features(Model.find(), req.query)
+        .filter()
+        .sort()
+        .limit_fields()
+        .paginate();
 
+      const docs = await features.query;
       res.status(200).json({
         status: 'success',
+        results: docs.length,
         data: docs,
       });
     } catch (err) {
@@ -26,11 +36,15 @@ exports.get_all = (Model) => {
   };
 };
 
-exports.get_one = (Model) => {
+exports.get_one = (Model, pop_options) => {
   return async (req, res, next) => {
     try {
-      const doc = await Model.findById(req.params.id);
+      let query = Model.findById(req.params.id);
+      if (pop_options) query = query.populate(pop_options);
 
+      const doc = await query;
+
+      if (!doc) return next(new Error('No document found with that ID'));
       res.status(200).json({
         status: 'success',
         data: doc,
@@ -46,7 +60,7 @@ exports.create_one = (Model) => {
     try {
       const doc = await Model.create(req.body);
 
-      res.status(200).json({
+      res.status(201).json({
         status: 'success',
         data: doc,
       });
@@ -78,7 +92,7 @@ exports.delete_one = (Model) => {
     try {
       await Model.findByIdAndDelete(req.params.id);
 
-      res.status(200).json({
+      res.status(204).json({
         status: 'success',
         data: null,
       });

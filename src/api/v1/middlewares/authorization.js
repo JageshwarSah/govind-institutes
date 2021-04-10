@@ -12,9 +12,9 @@ exports.create_token = (id) => {
 };
 
 //* Send new token
-exports.send_new_token = (id) => {
-  const token = this.create_token(id);
-  res.status(201).json({
+exports.send_new_token = (res, status_code, user) => {
+  const token = this.create_token(user.id);
+  res.status(status_code).json({
     status: 'success',
     token,
   });
@@ -31,13 +31,7 @@ exports.signup = async (req, res, next) => {
       role: req.body.role,
     });
 
-    const token = this.create_token(new_user.id);
-
-    res.status(201).json({
-      status: 'success',
-      token,
-      data: new_user,
-    });
+    this.send_new_token(res, 201, new_user);
   } catch (err) {
     next(err);
   }
@@ -56,14 +50,12 @@ exports.login = async (req, res, next) => {
   try {
     const user = await User.findOne({ email }).select('+password');
 
-    // if (!user) return next(new Error('Email is not registed', 404));
-
     //TODO Verify User provided password with database
     if (!user || !(await user.verify_password(password, user.password)))
       return next(new Error('Invalid username or password', 401));
 
     //TODO: Create and send access token
-    this.send_new_token(user.id);
+    this.send_new_token(res, 200, user);
   } catch (err) {
     next(err);
   }
@@ -89,12 +81,41 @@ exports.update_password = async (req, res, next) => {
 
     await user.save();
 
-    const token = this.create_token(user.id);
-    response.success(res, 200, token);
+    this.send_new_token(res, 200, user);
   } catch (err) {
     next(err);
   }
 };
+
+exports.delete_me = async (req, res, next) => {
+  //TODO: Get login info
+  const { password } = { ...req.body };
+
+  //TODO: Check if required information are provided
+  if (!password) return next(new Error('Please provide your password', 400));
+
+  //TODO Verify User provided password with database
+  try {
+    const user = await User.findById(req.user.id).select('+password');
+    console.log(user);
+    if (!user || !(await user.verify_password(password, user.password)))
+      return next(new Error('Invalid username or password', 401));
+
+    user.active = false;
+    await user.save({ validateBeforeSave: false });
+    res.status(204).json({
+      status: 'success',
+      data: null,
+    });
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+
+//TODO: Implemenet forgot password route
+
+//TODO: Implement reset password route
 
 //* Protect Access Middleware
 exports.protect = async (req, res, next) => {
@@ -130,7 +151,6 @@ exports.protect = async (req, res, next) => {
     //TODO: Grant protected access
     //TODO: Pass user info with request objectd
     req.user = current_user;
-    console.log('Protected access granted');
     next();
   } catch (err) {
     next(err);

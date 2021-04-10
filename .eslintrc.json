@@ -13,14 +13,14 @@
     "if-else-if": "warn",
     "no-empty": "warn",
     "spaced-comment": "off",
-    "lines-between-class-members": [
-      "error",
-      "always",
-      { "exceptAfterSingleLine": true }
-    ],
-    "newline-after-var": "warn",
-    "newline-before-return": "warn",
-    "lines-around-comment": ["warn", { "beforeLineComment": true }],
+    // "lines-between-class-members": [
+    //   "error",
+    //   "always",
+    //   { "exceptAfterSingleLine": true }
+    // ],
+    // "newline-after-var": "warn",
+    // "newline-before-return": "warn",
+    // "lines-around-comment": ["warn", { "beforeLineComment": true }],
     "no-console": "warn",
     "consistent-return": "off",
     "func-names": "off",

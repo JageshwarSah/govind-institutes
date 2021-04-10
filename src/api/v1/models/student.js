@@ -27,9 +27,13 @@ const studentSchema = new mongoose.Schema(
       type: String,
     },
     mobile: Number,
+    emial: String,
     registrationDate: {
       type: Date,
       default: Date.now(),
+    },
+    courseEnrolled: {
+      type: mongoose.Schema.ObjectId,
     },
   },
   {
@@ -37,6 +41,10 @@ const studentSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+// studentSchema.pre(/^find/, function (next) {
+//   next();
+// });
 
 // Virtual Fields
 studentSchema.virtual('registrationYear').get(function () {

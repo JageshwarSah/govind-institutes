@@ -14,6 +14,7 @@ router.route('/login').post(auth.login);
 
 router.use(auth.protect);
 router.route('/update-password').patch(auth.update_password);
+router.route('/delete-me').post(auth.delete_me);
 
 router.route('/').get(auth.restrict_to('admin'), controller.get_all_users);
 

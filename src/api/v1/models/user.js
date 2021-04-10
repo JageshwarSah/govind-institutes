@@ -30,6 +30,7 @@ const userSchema = new mongoose.Schema(
     },
     passwordChangedAt: {
       type: Date,
+      // select: false,
     },
 
     passwordResetToken: String,
@@ -65,6 +66,11 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+userSchema.pre(/^find/, async function (next) {
+  this.find({ active: { $ne: false } });
+  next();
+});
+
 userSchema.methods.correct_token_timestamp = function (token_timestamp) {
   const password_modified_time = parseInt(
     this.passwordChangedAt.getTime() / 1000,
@@ -79,11 +85,7 @@ userSchema.methods.verify_password = async function (
   candidate_password,
   user_password
 ) {
-  try {
-    return await bcrypt.compare(candidate_password, user_password);
-  } catch (err) {
-    next(err);
-  }
+  return await bcrypt.compare(candidate_password, user_password);
 };
 
 module.exports = mongoose.model('User', userSchema);

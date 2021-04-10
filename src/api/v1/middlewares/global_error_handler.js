@@ -7,6 +7,10 @@ const send_production_error = (error, res) => {
 };
 
 // TODO Define more operational errors
+const cast_error_db = (err) => {
+  return new Error('Please provide proper id', 400);
+};
+
 // Duplicate field error
 const duplicate_field_error_db = (err) => {
   const message = `Duplicate field entry, [${Object.keys(
@@ -20,7 +24,7 @@ const validation_error_db = (err) => {
 };
 
 const jwt_token_error = () => {
-  return new Error();
+  return new Error('Invalid token', 400);
 };
 
 //* This is the global error handler overridden method provided by express
@@ -33,8 +37,8 @@ module.exports = (err, req, res, next) => {
     res.status(err.status_code).json({
       status: err.status,
       message: err.message,
-      descrpition: 'This is from global error middleware',
-      err,
+      error: err,
+      stack: err.stack,
     });
   }
 
@@ -42,8 +46,9 @@ module.exports = (err, req, res, next) => {
     let error = Object.assign(err);
 
     //! Mark known error as operational
+    if (error.name === 'CastError') error = cast_error_db(error);
     if (error.code === 11000) error = duplicate_field_error_db(error);
-    // if (error.name === 'ValidationError') error = validation_error_db(error);
+    if (error.name === 'ValidationError') error = validation_error_db(error);
     if (error.name === 'JsonWebTokenError') error = jwt_token_error();
 
     //* Send proper user friendly error

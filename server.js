@@ -1,5 +1,10 @@
 const dotenv = require('dotenv');
-const mongoose = require('mongoose');
+
+//! Handle UncaughtException Event
+process.on('uncaughtException', (err) => {
+  console.log(err.name, err.message);
+  process.exit(1);
+});
 
 const database = require('./src/api/v1/helpers/database');
 const app = require('./src/api/v1/app');
@@ -14,15 +19,18 @@ const db = process.env.DATABASE_URL.replace(
   process.env.DATABASE_PASSWORD
 );
 
-// TODO Implement Retry Function for db connection
+// TODO: Implement Retry Function for db connection
+
+let server;
+let retry_count = 3;
 const start_applicatoin = async () => {
   try {
     await database.connect(db);
-    app.listen(port, () => {
+    server = app.listen(port, () => {
       console.log(`App is runing on port ${port}`);
     });
   } catch (err) {
-    console.log(err);
+    console.log(err.name, err.message);
   }
 };
 
@@ -36,3 +44,12 @@ start_applicatoin();
  *
  * 3) Start listening - only after database connection established
  */
+
+//! Handle UnhandledRejection Event
+process.on('unhandledRejection', (err) => {
+  console.log('Shutting down server...');
+  console.log(err.name, err.message);
+  server.close(() => {
+    process.exit(1);
+  });
+});
